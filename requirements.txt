@@ -1,0 +1,11 @@
+streamlit
+requests
+openai
+python-docx
+pypdf
+pdfplumber
+pymupdf
+pydub
+audioop-lts
+imageio-ffmpeg
+SpeechRecognition
