@@ -9,17 +9,14 @@ import subprocess
 import os
 import tempfile
 import imageio_ffmpeg
-import fitz  # PyMuPDF สำหรับสกัดข้อความจาก PDF รูปภาพ
-import speech_recognition as sr  # Google Web Speech API
+import fitz  
+import speech_recognition as sr  
 from openai import OpenAI
 from docx import Document
 from docx.shared import Pt, RGBColor
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from pypdf import PdfReader
 
-# ==========================================
-# 1. การตั้งค่า API Keys
-# ==========================================
 try:
     AIFORTHAI_API_KEY = st.secrets.get("AIFORTHAI_API_KEY", "PhC1TMiWfddbewzDGUtCZCgXoCg94uqZ")
     THAILLM_API_KEY = st.secrets.get("THAILLM_API_KEY", "gYkR4ZwL4Aq3gnkxHy9vQBv6owlXatza")
@@ -27,16 +24,12 @@ except Exception:
     AIFORTHAI_API_KEY = "PhC1TMiWfddbewzDGUtCZCgXoCg94uqZ"
     THAILLM_API_KEY = "gYkR4ZwL4Aq3gnkxHy9vQBv6owlXatza"
 
-
-
 thaillm_client = OpenAI(
     api_key=THAILLM_API_KEY,
     base_url="https://api.thaillm.or.th/v1"
 )
 
-# ==========================================
-# 2. ระบบฐานข้อมูลผู้ใช้ (SQLite Auth)
-# ==========================================
+
 @st.cache_resource
 def init_db():
     with sqlite3.connect("users.db") as conn:
@@ -72,9 +65,6 @@ def authenticate_user(username, password):
 
 init_db()
 
-# ==========================================
-# 3. Helper Functions (ประมวลผลไฟล์ & AI)
-# ==========================================
 def process_ocr(image_bytes):
     url = "https://api.aiforthai.in.th/ocr"
     headers = {"Apikey": AIFORTHAI_API_KEY}
@@ -134,7 +124,7 @@ def process_docx_input(docx_bytes):
         return ""
 
 def process_stt(audio_bytes, file_name="audio.wav"):
-    # 1. แปลงไฟล์เสียงเป็น WAV 16kHz Mono โดยใช้ imageio_ffmpeg
+
     send_bytes = audio_bytes
     try:
         ffmpeg_exe = imageio_ffmpeg.get_ffmpeg_exe()
@@ -161,7 +151,7 @@ def process_stt(audio_bytes, file_name="audio.wav"):
         st.error(f"ไม่สามารถแปลงไฟล์เสียงได้: {e}")
         return ""
 
-    # 2. ถอดข้อความภาษาไทยด้วย Google Web Speech API (ฟรี ไม่ต้องใช้ API Key)
+
     recognizer = sr.Recognizer()
     try:
         audio_file = io.BytesIO(send_bytes)
@@ -270,9 +260,6 @@ def create_docx(text_content, user_name):
     buffer.seek(0)
     return buffer
 
-# ==========================================
-# 4. หน้าตา Web Application (Streamlit UI)
-# ==========================================
 st.set_page_config(page_title="Smart Study Companion Pro", page_icon="🎓", layout="wide")
 
 if "authenticated" not in st.session_state:
@@ -280,7 +267,7 @@ if "authenticated" not in st.session_state:
 if "user_name" not in st.session_state:
     st.session_state["user_name"] = ""
 
-# --- หน้า Login / Register ---
+
 if not st.session_state["authenticated"]:
     st.title("🎓 Smart Study Companion")
     st.caption("ระบบย่อยเนื้อหาการเรียนอัจฉริยะ สำหรับนักเรียน/นักศึกษา")
@@ -318,7 +305,7 @@ if not st.session_state["authenticated"]:
                 else:
                     st.error("ชื่อผู้ใช้นี้มีผู้ใช้งานแล้ว")
 
-# --- หน้าแอปพลิเคชันหลัก ---
+
 else:
     st.sidebar.title("👤 บัญชีผู้ใช้")
     st.sidebar.write(f"สวัสดี, **คุณ{st.session_state['user_name']}**")
